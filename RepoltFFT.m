@@ -83,7 +83,7 @@ set(ax3,'FontName','Times New Roman','FontSize', 9,'FontWeight','bold');
 set(ax3,'XGrid','on');
 set(ax3,'XMinorGrid','on','ClippingStyle','rectangle');
 
-set(ax3,'YMinorGrid','off');
+set(ax3,'YMinorGrid','on');
 set(ax3,'YGrid','on');
 
 xlabel('Harmonic Order','Units','normalized','Position',[0.5 -0.40], ...

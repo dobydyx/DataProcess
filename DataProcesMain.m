@@ -18,46 +18,23 @@
 clc;
 
 % Remove items from workspace, freeing up system memory
-% clear ;
+clear ;
 
 close all;
 % Sample Interval. Based on the different oscilloscope, which can be 
 % obtained from the data file.
-Tmin=3.2e-6;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Data Acquisition%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reads a data file. The number of starting rows and columns is based on 
-% the valid data area in the CSV file.
-WaveData=csvread('.\Demo\Tek000_ALL.csv',12,0); 
-
-% Move the time base of the oscilloscope to 0.
-MotorCurrent.time=WaveData(:,1)-WaveData(1,1);
-
-%Extraction the column of phase A current data
-MotorCurrent.a=WaveData(:,5);
-
-%Extraction the column of phase B current data
-MotorCurrent.b=WaveData(:,6);
-
-%Extraction the column of phase C current data
-MotorCurrent.c=WaveData(:,7);
-
-%Extraction the column of phase D current data
-MotorCurrent.d=WaveData(:,8);
-
-%Extraction the column of phase E current data
-MotorCurrent.e=WaveData(:,9);
-
+MotorMeasurements=readFiles();
 %%
 %%%%%%%%%%%%%%%%%%%Setting and Plotting current waveforms%%%%%%%%%%%%%%%%%%
 %Set the start and end time for drawing the waveform
-Current_Start_Time=0.1;                Current_End_Time=0.3;
+Current_Start_Time=0.7;                Current_End_Time=0.8;
 
-Start_Point=floor(Current_Start_Time/Tmin);
+Start_Point=floor(Current_Start_Time/Tmin)+1;
 
 End_Point=floor(Current_End_Time/Tmin);
 %Set the font size and line width in figure
-font_size=8;                           linewidth=1;
+font_size=8;                           linewidth=1.5;
 
 SpeedRef=300;                          Polepairs=31;
 %Set the width and height of the figure (Units:centimeters)
@@ -87,11 +64,11 @@ Add_Annotation_toPhasecurrent(linewidth, font_size);
 %The time should be set within the time range of the oscilloscope and the 
 % maximum value of "MotorCurrent.time" can be checked 
 % to determine the valid recording time.
-FFT_Start_Time=0.3; FFT_End_Time=0.4;
+FFT_Start_Time=0.0; FFT_End_Time=0.6;
 
 %Find the start and end points of the array 
 % according to the set time range.
-Start_Point=floor(FFT_Start_Time/(Tmin));
+Start_Point=floor(FFT_Start_Time/(Tmin))+1;
 End_Point=floor(FFT_End_Time/Tmin);
 
 %Calculation of the fundamental electrical frequency 
@@ -112,7 +89,7 @@ FTT_Basecycle=floor((FFT_End_Time-FFT_Start_Time)*FunFrq);
 
 %Calculating the FFT for phase currents
 [FFT_outputname,FFTdata]=PhaseCurrentFFT(MotorCurrent, Start_Point, ...
-    End_Point, FunFrq,FFT_Start_Time,FTT_Basecycle, ...
+    End_Point, FunFrq,FFT_Start_Time,18, ...
     MaxFrequency, FFTresulatName);
 
 %% Re-plotting the phase current FFT data
@@ -125,12 +102,41 @@ FFT_WaveData=csvread(FFT_outputname,0,0);
 %Plotting FFT images
 Fig2=RepoltFFT(FFT_WaveData, FunFrq, MaxFrequency, FFTdata);
 
+%% 绘制\alpha\-\beta轴电流轨迹
+X = 2*pi/5;
+
+T_Martix=0.4*[1,cos(X),cos(2*X),cos(3*X),cos(4*X);
+              0,sin(X),sin(2*X),sin(3*X),sin(4*X); 
+              1,cos(3*X),cos(3*2*X),cos(3*3*X),cos(3*4*X); 
+              0,sin(3*X),sin(3*2*X),sin(3*3*X),sin(3*4*X);
+              0.5,0.5,0.5,0.5,0.5];
+for i=1:length(MotorCurrent.a)
+    ialphabeta=T_Martix*[MotorCurrent.a(i);MotorCurrent.b(i);...
+        MotorCurrent.c(i);MotorCurrent.d(i);MotorCurrent.e(i)];
+    ialpha1(i)=ialphabeta(1,1);
+    ibeta1(i)=ialphabeta(2,1);
+    ialpha3(i)=ialphabeta(3,1);
+    ibeta3(i)=ialphabeta(4,1);
+end
+
+Fig3=Plot_alphabeta(ialpha1, ibeta1, ialpha3, ibeta3,linewidth);
+
+%% 转矩
+Fig4=PlotTorque(MotorTorque, MotorCurrent, Tmin,0,0.1);
+
 %%
+
 %Print the drawn image, make sure the image is not turned off
 Currenttime=string(datetime('now','Format','uuuu-MM-dd-HH-mm-ss'));
 
-print(Fig1,'-dtiff',"-r600",strcat('.\Demo\','Five-phase-Current@600dpi-' ...
+print(Fig1,'-dtiff',"-r192",strcat('Five-phase-Current@192dpi-' ...
     ,Currenttime,'.tiff'));
 
-print(Fig2,'-dtiff',"-r600",strcat('.\Demo\','FFT-result-PhaseA@600dpi-' ...
+print(Fig2,'-dtiff',"-r192",strcat('FFT-result-PhaseA@192dpi-' ...
+    ,Currenttime,'.tiff'));
+
+print(Fig3,'-dtiff',"-r192",strcat('alphabetaCurrent@192dpi-' ...
+    ,Currenttime,'.tiff'));
+
+print(Fig4,'-dtiff',"-r192",strcat('Torque@192dpi-' ...
     ,Currenttime,'.tiff'));
