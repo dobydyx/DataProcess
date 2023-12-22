@@ -23,7 +23,7 @@ clear ;
 close all;
 % Sample Interval. Based on the different oscilloscope, which can be 
 % obtained from the data file.
-%%
+
 % 读取文件
 MotorMeasurements=readFiles();
 %%
@@ -32,7 +32,26 @@ plotSetup=createPlotSetup(MotorMeasurements);
 %%
 % 绘制相电流
 [Fig1,plotSetup,MotorMeasurements]=plotCurrentWaveform(plotSetup, MotorMeasurements);
-
+%% 绘制dq电流（或转矩）
+Fig2=PlotTorque(plotSetup, MotorMeasurements);
+%%
+% 绘制转速
+Fig3=PlotSpeed(plotSetup, MotorMeasurements);
+%%
+    Currenttime=string(datetime('now','Format','yyMMddHHmmss'));
+    print(Fig1,plotSetup.CurrentFigParams.ExportFormat,plotSetup.CurrentFigParams.ExportDPI, ...
+    strcat(MotorMeasurements.pathName,'current_',MotorMeasurements.fileName(1:5), ...
+    Currenttime,'.png'));
+%%
+    Currenttime=string(datetime('now','Format','yyMMddHHmmss'));
+    print(Fig2,plotSetup.CurrentFigParams.ExportFormat,plotSetup.CurrentFigParams.ExportDPI, ...
+    strcat(MotorMeasurements.pathName,'dqcurrent_',MotorMeasurements.fileName(1:5), ...
+    Currenttime,'.png'));
+%%
+    Currenttime=string(datetime('now','Format','yyMMddHHmmss'));
+    print(Fig3,plotSetup.CurrentFigParams.ExportFormat,plotSetup.CurrentFigParams.ExportDPI, ...
+    strcat(MotorMeasurements.pathName,'speed_',MotorMeasurements.fileName(1:5), ...
+    Currenttime,'.png'));
 %% Caculate phase current FFT
 % FFT analysis using "power_fftscope" is achieved by constructing 
 % structures for the input of data.
