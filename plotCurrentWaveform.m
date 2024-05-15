@@ -10,12 +10,12 @@ function [fig,out_ps,out_mm] = plotCurrentWaveform(in_ps, in_mm)
     in_mm.DataName=fieldnames(in_mm.Data)';
 
 
-    for i=1:1
+    for i=1:5
         plot(ax,in_mm.Data.(in_mm.DataName{1})([in_ps.Current.StartPoint:1:in_ps.Current.EndPoint],1), ...
             in_mm.Data.(in_mm.DataName{4+i})([in_ps.Current.StartPoint:1:in_ps.Current.EndPoint],1), ...
             'color',in_ps.CurrentFigParams.Color(i),...
             'LineWidth',in_ps.CurrentFigParams.LineWidth);
-        in_mm.Maxcurrent(i)=max(in_mm.Data.(in_mm.DataName{4+i})([in_ps.Current.StartPoint:in_ps.Current.EndPoint],1));
+        in_mm.Maxcurrent(i)=max(in_mm.Data.(in_mm.DataName{3+i})([in_ps.Current.StartPoint:in_ps.Current.EndPoint],1));
         hold on
     end
     set(ax,'FontName','Times New Roman', ...
